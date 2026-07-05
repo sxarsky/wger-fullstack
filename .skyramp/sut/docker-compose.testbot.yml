@@ -1,0 +1,37 @@
+# Testbot SUT for wger-fullstack.
+# Run with: docker compose -f .skyramp/sut/docker-compose.testbot.yml --project-directory . up -d --build
+# (--project-directory . makes the repo root the build context for both services)
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: .skyramp/sut/Dockerfile.backend
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SETTINGS_MODULE: settings.ci
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/api/v2/version/"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: .skyramp/sut/Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_SERVER: http://localhost:8000
+      VITE_API_KEY: apikey-admin
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:3000/"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 20s

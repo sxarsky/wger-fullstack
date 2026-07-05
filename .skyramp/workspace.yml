@@ -1,0 +1,36 @@
+# Skyramp Workspace Configuration
+workspace:
+  repoName: sxarsky/wger-fullstack
+  repoUrl: https://github.com/sxarsky/wger-fullstack
+metadata:
+  schemaVersion: v1
+  executorVersion: v1.3.32
+  createdAt: "2026-07-05T04:12:40.964Z"
+  updatedAt: "2026-07-05T04:12:40.970Z"
+services:
+  - serviceName: wger-fullstack-wger-backend
+    language: python
+    framework: pytest
+    testDirectory: tests/skyramp/wger
+    api:
+      schemaPath: http://localhost:8000/api/v2/schema
+      authType: bearer
+      authHeader: Authorization
+      authScheme: Bearer
+      baseUrl: http://localhost:8000/api/v2
+    runtimeDetails:
+      serverStartCommand: docker compose -f .skyramp/sut/docker-compose.testbot.yml --project-directory . up -d backend
+      runtime: docker
+      dockerNetwork: wger-fullstack_default
+  - serviceName: wger-fullstack-wger-react-frontend
+    language: typescript
+    framework: playwright
+    testDirectory: tests/skyramp/wger-react
+    api:
+      authType: none
+      authHeader: ""
+      baseUrl: http://localhost:3000
+    runtimeDetails:
+      serverStartCommand: docker compose -f .skyramp/sut/docker-compose.testbot.yml --project-directory . up -d frontend
+      runtime: docker
+      dockerNetwork: wger-fullstack_default
