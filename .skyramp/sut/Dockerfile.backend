@@ -1,0 +1,30 @@
+# Testbot SUT image for the wger Django backend.
+# Build context MUST be the repository root (docker compose --project-directory .).
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app \
+    DJANGO_SETTINGS_MODULE=settings.ci
+
+WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+        build-essential \
+        libpq-dev \
+        gettext \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY wger/ /app/
+
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir .
+
+COPY .skyramp/sut/backend-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 8000
+
+CMD ["/entrypoint.sh"]
